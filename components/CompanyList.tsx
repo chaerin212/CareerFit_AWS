@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { UserProfile, Application, ApplicationStatus, RecruitType } from '../types';
-import { searchJobOpenings } from '../services/geminiService';
+import { searchJobOpenings as searchJobOpeningsAPI } from '../services/apiService';
 import { Search, Loader2, Bookmark, CheckCircle, ArrowRight, Building2, Sparkles, Plus } from 'lucide-react';
 
 interface CompanyListProps {
@@ -21,13 +21,14 @@ const CompanyList: React.FC<CompanyListProps> = ({ profile, applications, onSave
     if (!query.trim()) return;
     setLoading(true);
     try {
-      const data = await searchJobOpenings(profile, query);
+      const response = await searchJobOpeningsAPI({ profile, query });
+      const data = response.results;
       // Sort by Fit Score (Highest first for better matching experience)
       const sortedData = [...data].sort((a, b) => b.fitScore - a.fitScore);
       setResults(sortedData);
     } catch (error) {
-      console.error(error);
-      alert('검색 중 오류가 발생했습니다.');
+      console.error('검색 중 오류가 발생했습니다:', error);
+      alert('검색 중 오류가 발생했습니다. 백엔드 서버를 확인해주세요.');
     } finally {
       setLoading(false);
     }

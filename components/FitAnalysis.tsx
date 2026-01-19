@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { UserProfile, FitAnalysisResult } from '../types';
-import { analyzeFit } from '../services/geminiService';
+import { analyzeFit as analyzeFitAPI } from '../services/apiService';
 import { Loader2, Zap, Target, Smile, ShieldCheck, AlertCircle } from 'lucide-react';
 
 interface FitAnalysisProps {
@@ -17,11 +17,14 @@ const FitAnalysis: React.FC<FitAnalysisProps> = ({ profile }) => {
     if (!companyInfo.name || !companyInfo.position) return;
     setLoading(true);
     try {
-      const result = await analyzeFit(profile, companyInfo);
+      const result = await analyzeFitAPI({
+        profile,
+        companyInfo
+      });
       setAnalysis(result);
     } catch (error) {
-      console.error(error);
-      alert('분석 중 오류가 발생했습니다.');
+      console.error('분석 중 오류가 발생했습니다:', error);
+      alert('분석 중 오류가 발생했습니다. 백엔드 서버를 확인해주세요.');
     } finally {
       setLoading(false);
     }

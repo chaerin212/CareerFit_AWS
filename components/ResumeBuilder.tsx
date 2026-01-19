@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { UserProfile, Application } from '../types';
-import { generateResumeContent } from '../services/geminiService';
+import { generateResumeContent as generateResumeContentAPI } from '../services/apiService';
 import { Sparkles, Loader2, Copy, Check, Briefcase, Building2, CheckCircle, FileText, X, Send, User, Bot, History, Layers } from 'lucide-react';
 
 interface Message {
@@ -87,7 +87,13 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
         ? { name: selectedApp.companyName, position: selectedApp.position, jd: "" }
         : { name: "입력되지 않음", position: "입력되지 않음", jd: "" };
 
-      const output = await generateResumeContent(profile, companyInfo, enrichedPrompt);
+      const response = await generateResumeContentAPI({
+        profile,
+        companyInfo,
+        prompt: enrichedPrompt,
+        selectedProjects: selectedProjects.map(p => p.title)
+      });
+      const output = response.content;
       
       const assistantMessage: Message = {
         id: Math.random().toString(36).substr(2, 9),

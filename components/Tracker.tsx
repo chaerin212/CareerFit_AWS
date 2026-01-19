@@ -1,7 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Application, ApplicationStatus, RecruitType } from '../types';
 import { Plus, Trash2, Calendar, Search, Mail, ExternalLink, ChevronDown, Filter, ListFilter, ArrowUpDown, Maximize2, Settings2 } from 'lucide-react';
+import { getApplications, createApplication, deleteApplication as deleteApplicationAPI } from '../services/apiService';
 
 interface TrackerProps {
   applications: Application[];
@@ -21,13 +22,37 @@ const Tracker: React.FC<TrackerProps> = ({ applications, onAdd, onUpdate, onDele
     link: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 컴포넌트 마운트 시 백엔드에서 데이터 가져오기 (선택적)
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        const response = await getApplications();
+        // 필요시 상위 컴포넌트에 데이터 전달
+        console.log('백엔드 지원 내역:', response.applications);
+      } catch (error) {
+        console.log('백엔드 연결 없음, 로컬 데이터 사용');
+      }
+    };
+    fetchApplications();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.companyName && formData.position) {
-      onAdd({
+      const newApp: Application = {
         ...formData as Application,
         id: Math.random().toString(36).substr(2, 9),
-      });
+      };
+      
+      try {
+        // 백엔드 API 호출
+        await createApplication(newApp);
+      } catch (error) {
+        console.error('백엔드 저장 오류, 로컬만 저장:', error);
+      }
+      
+      // 로컬 상태 업데이트
+      onAdd(newApp);
       setIsModalOpen(false);
       setFormData({ 
         companyName: '', 
@@ -38,6 +63,17 @@ const Tracker: React.FC<TrackerProps> = ({ applications, onAdd, onUpdate, onDele
         link: ''
       });
     }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      // 백엔드 API 호출
+      await deleteApplicationAPI(id);
+    } catch (error) {
+      console.error('백엔드 삭제 오류, 로컬만 삭제:', error);
+    }
+    // 로컬 상태 업데이트
+    onDelete(id);
   };
 
   const statusGroups = [
@@ -160,7 +196,7 @@ const Tracker: React.FC<TrackerProps> = ({ applications, onAdd, onUpdate, onDele
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <button onClick={() => onDelete(app.id)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 transition-all">
+                    <button onClick={() => handleDelete(app.id)} className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-500 transition-all">
                       <Trash2 size={14} />
                     </button>
                   </td>

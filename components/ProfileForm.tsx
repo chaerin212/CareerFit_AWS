@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { UserProfile } from '../types';
 import { Save, Plus, X, GraduationCap, Briefcase, Code, Award, ShieldCheck, Trash2, Calendar } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
 
 interface ProfileFormProps {
   profile: UserProfile;
@@ -12,9 +13,18 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ profile, onSave }) => {
   const [data, setData] = useState<UserProfile>(profile);
   const [newSkill, setNewSkill] = useState('');
 
-  const handleSave = () => {
-    onSave(data);
-    alert('프로필이 성공적으로 저장되었습니다!');
+  const handleSave = async () => {
+    try {
+      // 백엔드 API 호출
+      await saveProfile(data);
+      onSave(data);
+      alert('프로필이 성공적으로 저장되었습니다!');
+    } catch (error) {
+      console.error('프로필 저장 오류:', error);
+      // 로컬 저장은 계속 진행
+      onSave(data);
+      alert('프로필이 로컬에 저장되었습니다. (백엔드 연결 확인 필요)');
+    }
   };
 
   const addSkill = () => {

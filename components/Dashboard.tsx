@@ -1,14 +1,31 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Application, ApplicationStatus } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { ArrowUpRight, CheckCircle2, Clock, Send, Briefcase, Calendar, MoreHorizontal, AlertCircle, BarChart3 as BarChartIcon } from 'lucide-react';
+import { getDashboardStats } from '../services/apiService';
 
 interface DashboardProps {
   applications: Application[];
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ applications }) => {
+  const [backendStats, setBackendStats] = useState<any>(null);
+
+  // 백엔드에서 통계 데이터 가져오기 (선택적)
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const stats = await getDashboardStats();
+        setBackendStats(stats);
+        console.log('백엔드 통계:', stats);
+      } catch (error) {
+        console.log('백엔드 통계 없음, 로컬 계산 사용');
+      }
+    };
+    fetchStats();
+  }, [applications]);
+
   const getDDay = (targetDate: string) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
