@@ -41,7 +41,7 @@ const mockJobs = [
 ];
 
 // 직무 공고 검색
-router.post('/search', (req, res) => {
+router.post('/search', async (req, res) => {
   try {
     const { profile, query } = req.body;
 
