@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { UserProfile, Application } from '../types';
 import { generateResumeContent as generateResumeContentAPI } from '../services/apiService';
 import { Sparkles, Loader2, Copy, Check, Briefcase, Building2, CheckCircle, FileText, X, Send, User, Bot, History, Layers } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
   id: string;
@@ -26,7 +28,7 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
   const [messages, setMessages] = useState<Message[]>([]);
   const [result, setResult] = useState('');
   const [copied, setCopied] = useState(false);
-  
+
   // Block Selection States
   const [selectedProjectIndices, setSelectedProjectIndices] = useState<number[]>([]);
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
@@ -40,7 +42,7 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
   }, [messages]);
 
   const toggleProject = (idx: number) => {
-    setSelectedProjectIndices(prev => 
+    setSelectedProjectIndices(prev =>
       prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
     );
   };
@@ -66,7 +68,7 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
         company: selectedApp?.companyName
       }
     };
-    
+
     setMessages(prev => [...prev, userMessage]);
     const currentPrompt = prompt;
     setPrompt('');
@@ -83,7 +85,7 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
     `;
 
     try {
-      const companyInfo = selectedApp 
+      const companyInfo = selectedApp
         ? { name: selectedApp.companyName, position: selectedApp.position, jd: "" }
         : { name: "입력되지 않음", position: "입력되지 않음", jd: "" };
 
@@ -94,14 +96,14 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
         selectedProjects: selectedProjects.map(p => p.title)
       });
       const output = response.content;
-      
+
       const assistantMessage: Message = {
         id: Math.random().toString(36).substr(2, 9),
         role: 'assistant',
         content: "분석을 완료하여 문서를 생성/수정했습니다. 우측 패널에서 상세 내용을 확인하실 수 있습니다.",
         timestamp: new Date()
       };
-      
+
       setResult(output || '');
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
@@ -145,14 +147,13 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {profile.projects.map((project, idx) => (
-              <div 
+              <div
                 key={idx}
                 onClick={() => toggleProject(idx)}
-                className={`min-w-[150px] max-w-[150px] p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${
-                  selectedProjectIndices.includes(idx) 
-                    ? 'bg-blue-600/10 border-blue-500 ring-2 ring-blue-500/20' 
+                className={`min-w-[150px] max-w-[150px] p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${selectedProjectIndices.includes(idx)
+                    ? 'bg-blue-600/10 border-blue-500 ring-2 ring-blue-500/20'
                     : 'bg-zinc-950/50 border-zinc-800 hover:border-zinc-700'
-                }`}
+                  }`}
               >
                 <h4 className="text-[11px] font-black text-white truncate mb-1">{project.title}</h4>
                 <p className="text-[10px] text-zinc-600 truncate">{project.period}</p>
@@ -174,14 +175,13 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {applications.map((app) => (
-              <div 
+              <div
                 key={app.id}
                 onClick={() => selectApplication(app.id)}
-                className={`min-w-[150px] max-w-[150px] p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${
-                  selectedAppId === app.id 
-                    ? 'bg-emerald-600/10 border-emerald-500 ring-2 ring-emerald-500/20' 
+                className={`min-w-[150px] max-w-[150px] p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${selectedAppId === app.id
+                    ? 'bg-emerald-600/10 border-emerald-500 ring-2 ring-emerald-500/20'
                     : 'bg-zinc-950/50 border-zinc-800 hover:border-zinc-700'
-                }`}
+                  }`}
               >
                 <h4 className="text-[11px] font-black text-white truncate mb-1">{app.companyName}</h4>
                 <p className="text-[10px] text-zinc-600 truncate">{app.position}</p>
@@ -202,14 +202,14 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
             </h3>
           </div>
 
-          <div 
+          <div
             ref={scrollRef}
             className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth bg-gradient-to-b from-transparent to-zinc-950/30"
           >
             {messages.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-30">
                 <Bot size={48} className="text-zinc-600" />
-                <p className="text-sm font-medium">컨텍스트 블록을 먼저 선택하고<br/>AI에게 요청사항을 말씀해 주세요.</p>
+                <p className="text-sm font-medium">컨텍스트 블록을 먼저 선택하고<br />AI에게 요청사항을 말씀해 주세요.</p>
               </div>
             )}
             {messages.map((msg) => (
@@ -219,25 +219,24 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
                     {msg.role === 'user' ? <User size={16} className="text-white" /> : <Bot size={16} className="text-blue-500" />}
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <div className={`p-4 rounded-3xl text-sm leading-relaxed ${
-                      msg.role === 'user' 
-                        ? 'bg-blue-600 text-white rounded-tr-none' 
+                    <div className={`p-4 rounded-3xl text-sm leading-relaxed ${msg.role === 'user'
+                        ? 'bg-blue-600 text-white rounded-tr-none'
                         : 'bg-zinc-800/80 text-zinc-200 rounded-tl-none border border-zinc-700/50 backdrop-blur-sm'
-                    }`}>
+                      }`}>
                       {msg.content}
                     </div>
                     {msg.role === 'user' && msg.context && (msg.context.projects.length > 0 || msg.context.company) && (
                       <div className="flex flex-wrap gap-1 justify-end px-1 opacity-60">
-                         {msg.context.company && (
-                           <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-md text-[9px] font-bold">
-                             @{msg.context.company}
-                           </span>
-                         )}
-                         {msg.context.projects.map((p, i) => (
-                           <span key={i} className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-md text-[9px] font-bold">
-                             #{p}
-                           </span>
-                         ))}
+                        {msg.context.company && (
+                          <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-md text-[9px] font-bold">
+                            @{msg.context.company}
+                          </span>
+                        )}
+                        {msg.context.projects.map((p, i) => (
+                          <span key={i} className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-md text-[9px] font-bold">
+                            #{p}
+                          </span>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -319,8 +318,23 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
 
           <div className="flex-1 p-8 md:p-12 overflow-y-auto">
             {result ? (
-              <div className="whitespace-pre-wrap text-zinc-300 font-medium leading-relaxed text-base animate-in fade-in duration-700 selection:bg-blue-500/30">
-                {result}
+              <div className="text-zinc-300 font-medium leading-relaxed text-base animate-in fade-in duration-700 selection:bg-blue-500/30">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    h1: ({ node, ...props }) => <h1 className="text-2xl font-bold text-white mb-4 mt-6" {...props} />,
+                    h2: ({ node, ...props }) => <h2 className="text-xl font-bold text-white mb-3 mt-5 border-b border-zinc-800 pb-2" {...props} />,
+                    h3: ({ node, ...props }) => <h3 className="text-lg font-bold text-white mb-2 mt-4" {...props} />,
+                    p: ({ node, ...props }) => <p className="mb-4 last:mb-0" {...props} />,
+                    ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-4 space-y-1" {...props} />,
+                    ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-4 space-y-1" {...props} />,
+                    li: ({ node, ...props }) => <li className="text-zinc-300" {...props} />,
+                    strong: ({ node, ...props }) => <strong className="font-bold text-blue-400" {...props} />,
+                    code: ({ node, ...props }) => <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-100 font-mono text-sm" {...props} />,
+                  }}
+                >
+                  {result}
+                </ReactMarkdown>
               </div>
             ) : (
               <div className="h-full flex flex-col items-center justify-center opacity-10">
