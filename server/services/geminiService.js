@@ -19,7 +19,7 @@ class GeminiService {
    */
   async generateJobs(profile, query) {
     if (!process.env.GEMINI_API_KEY) {
-        return this.getFallbackJobs();
+      return this.getFallbackJobs();
     }
 
     try {
@@ -55,7 +55,7 @@ class GeminiService {
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
       const text = response.text().replace(/```json/g, '').replace(/```/g, '').trim(); // Clean markdown if present
-      
+
       const jobs = JSON.parse(text);
       return jobs;
 
@@ -75,18 +75,19 @@ class GeminiService {
    */
   async generateResume(profile, companyInfo, questions, selectedProjects) {
     if (!process.env.GEMINI_API_KEY) {
-        return "⚠️ API Key missing. Cannot generate resume.";
+      return "⚠️ API Key missing. Cannot generate resume.";
     }
 
     try {
-        const prompt = `
+      const prompt = `
             You are an expert career consultant. Write a professional cover letter/resume answers for the following applicant.
 
             Applicant Profile:
             - Name: ${profile.name}
             - Skills: ${profile.skills?.join(', ')}
             - Education: ${profile.education}
-            - Selected Projects: ${selectedProjects?.join(', ') || "No specific projects selected"}
+            - Selected Projects: 
+            ${selectedProjects?.join('\n\n') || "No specific projects selected"}
 
             Target Company:
             - Name: ${companyInfo.name}
@@ -97,15 +98,15 @@ class GeminiService {
             Use Markdown formatting. Use headings '## Question 1: ...' for each question.
 
             Questions to Answer:
-            ${questions.map((q, i) => `${i+1}. ${q}`).join('\n')}
+            ${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
         `;
 
-        const result = await this.model.generateContent(prompt);
-        return result.response.text();
+      const result = await this.model.generateContent(prompt);
+      return result.response.text();
 
     } catch (error) {
-        console.error("Gemini Resume Generation Failed:", error);
-        return "❌ Error generating resume. Please try again.";
+      console.error("Gemini Resume Generation Failed:", error);
+      return "❌ Error generating resume. Please try again.";
     }
   }
 
