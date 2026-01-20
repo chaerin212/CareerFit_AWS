@@ -40,7 +40,7 @@ const SAMPLE_APPS: Application[] = [
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  
+
   const [profile, setProfile] = useState<UserProfile>(() => {
     const saved = localStorage.getItem('careerfit_profile');
     if (saved) {
@@ -86,11 +86,11 @@ const App: React.FC = () => {
     switch (activeTab) {
       case 'dashboard': return <Dashboard applications={applications} />;
       case 'tracker': return (
-        <Tracker 
-          applications={applications} 
-          onAdd={addApplication} 
-          onUpdate={updateApplication} 
-          onDelete={deleteApplication} 
+        <Tracker
+          applications={applications}
+          onAdd={addApplication}
+          onUpdate={updateApplication}
+          onDelete={deleteApplication}
         />
       );
       case 'resume': return <ResumeBuilder profile={profile} applications={applications} />;

@@ -25,8 +25,11 @@ interface ResumeBuilderProps {
 const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) => {
   const [loading, setLoading] = useState(false);
   const [prompt, setPrompt] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [result, setResult] = useState('');
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const saved = localStorage.getItem('careerfit_resume_messages');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [result, setResult] = useState(() => localStorage.getItem('careerfit_resume_result') || '');
   const [copied, setCopied] = useState(false);
 
   // Block Selection States
@@ -40,6 +43,15 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Persist State
+  useEffect(() => {
+    localStorage.setItem('careerfit_resume_messages', JSON.stringify(messages));
+  }, [messages]);
+
+  useEffect(() => {
+    localStorage.setItem('careerfit_resume_result', result);
+  }, [result]);
 
   const toggleProject = (idx: number) => {
     setSelectedProjectIndices(prev =>
@@ -93,7 +105,10 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
         profile,
         companyInfo,
         prompt: enrichedPrompt,
-        selectedProjects: selectedProjects.map(p => p.title)
+        // Pass detailed project info
+        selectedProjects: selectedProjects.map(p =>
+          `[${p.title}] (${p.period}, 기여도: ${p.contribution})\n내용: ${p.description}`
+        )
       });
       const output = response.content;
 
@@ -151,8 +166,8 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
                 key={idx}
                 onClick={() => toggleProject(idx)}
                 className={`min-w-[150px] max-w-[150px] p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${selectedProjectIndices.includes(idx)
-                    ? 'bg-blue-600/10 border-blue-500 ring-2 ring-blue-500/20'
-                    : 'bg-zinc-950/50 border-zinc-800 hover:border-zinc-700'
+                  ? 'bg-blue-600/10 border-blue-500 ring-2 ring-blue-500/20'
+                  : 'bg-zinc-950/50 border-zinc-800 hover:border-zinc-700'
                   }`}
               >
                 <h4 className="text-[11px] font-black text-white truncate mb-1">{project.title}</h4>
@@ -179,8 +194,8 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
                 key={app.id}
                 onClick={() => selectApplication(app.id)}
                 className={`min-w-[150px] max-w-[150px] p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${selectedAppId === app.id
-                    ? 'bg-emerald-600/10 border-emerald-500 ring-2 ring-emerald-500/20'
-                    : 'bg-zinc-950/50 border-zinc-800 hover:border-zinc-700'
+                  ? 'bg-emerald-600/10 border-emerald-500 ring-2 ring-emerald-500/20'
+                  : 'bg-zinc-950/50 border-zinc-800 hover:border-zinc-700'
                   }`}
               >
                 <h4 className="text-[11px] font-black text-white truncate mb-1">{app.companyName}</h4>
@@ -220,8 +235,8 @@ const ResumeBuilder: React.FC<ResumeBuilderProps> = ({ profile, applications }) 
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <div className={`p-4 rounded-3xl text-sm leading-relaxed ${msg.role === 'user'
-                        ? 'bg-blue-600 text-white rounded-tr-none'
-                        : 'bg-zinc-800/80 text-zinc-200 rounded-tl-none border border-zinc-700/50 backdrop-blur-sm'
+                      ? 'bg-blue-600 text-white rounded-tr-none'
+                      : 'bg-zinc-800/80 text-zinc-200 rounded-tl-none border border-zinc-700/50 backdrop-blur-sm'
                       }`}>
                       {msg.content}
                     </div>
