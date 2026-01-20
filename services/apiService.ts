@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 /**
  * API Service Layer
  * S3 정적 웹페이지 호스팅 환경에서 EC2 백엔드와 통신
@@ -11,6 +12,27 @@ interface ApiRequestConfig {
   body?: any;
   headers?: Record<string, string>;
 }
+
+export interface Application {
+  id?: string;
+  companyName: string;
+  position: string;
+  status: string;
+  recruitType?: string;
+  date: string;
+  link?: string;
+  applicationForm?: string[]; // Added: Specific questions for this job
+}
+
+export interface JobOpening {
+  companyName: string;
+  position: string;
+  recruitType: string;
+  jdSummary: string;
+  fitScore: number;
+  applicationForm?: string[]; // Added: Questions from backend
+}
+
 
 /**
  * 공통 API 요청 핸들러
@@ -159,6 +181,7 @@ export interface JobOpening {
   recruitType: string;
   jdSummary: string;
   fitScore: number;
+  applicationForm?: string[]; // Added for Gemini
 }
 
 export interface SearchJobOpeningsResponse {
@@ -191,6 +214,7 @@ export interface GenerateResumeRequest {
   };
   prompt: string;
   selectedProjects?: string[];
+  applicationForm?: string[]; // Added: Pass questions to backend
 }
 
 export interface GenerateResumeResponse {
@@ -222,9 +246,10 @@ export interface Application {
   recruitType?: string;
   date: string;
   link?: string;
+  applicationForm?: string[];
 }
 
-export interface CreateApplicationRequest extends Omit<Application, 'id'> {}
+export interface CreateApplicationRequest extends Omit<Application, 'id'> { }
 
 export interface ApplicationResponse extends Application {
   id: string;

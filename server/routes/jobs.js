@@ -55,13 +55,11 @@ router.post('/search', (req, res) => {
 
     console.log(`✅ 직무 검색 요청: "${query || '전체'}"`);
 
-    // Mock 검색 결과 (실제로는 AI가 분석)
-    const results = mockJobs.map(job => ({
-      ...job,
-      fitScore: Math.floor(Math.random() * 20) + 75 // 75-95
-    })).sort((a, b) => b.fitScore - a.fitScore);
+    // Gemini를 이용한 동적 채용 공고 생성
+    const GeminiService = require('../services/geminiService');
+    const results = await GeminiService.generateJobs(profile, query || 'Software Engineer');
 
-    console.log(`✅ 검색 완료: ${results.length}개 공고 발견`);
+    console.log(`✅ 검색 완료: ${results.length}개 공고 생성됨`);
 
     res.json({
       results,
