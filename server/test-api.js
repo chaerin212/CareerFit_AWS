@@ -207,4 +207,7 @@ async function main() {
   }
 }
 
-main();
+// 즉시 실행
+(async () => {
+  await main();
+})();

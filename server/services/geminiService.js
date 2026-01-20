@@ -7,7 +7,8 @@ class GeminiService {
       console.warn("⚠️ GEMINI_API_KEY is not set! Gemini features will not work.");
     }
     this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Using Gemini 2.5 Flash - fast and versatile model
+    this.model = this.genAI.getGenerativeModel({ model: "models/gemini-2.5-flash" });
   }
 
   /**
